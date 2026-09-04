@@ -4,6 +4,8 @@ A self-built SIEM using the Elastic Stack (Elasticsearch + Kibana + Winlogbeat),
 
 Unlike a lot of home-lab writeups, every detection here fires against **genuine Windows Security events** generated through actual OS actions (failed logons, disabled account logon attempts, file access), not synthetic sample data. The two detections that needed data sources outside a single Windows PC (GeoIP-based anomalous login, M365 anonymous link sharing) use realistic simulated events built against the correct real-world log/field schema, the same technique detection engineers use to test rules for systems not yet in production.
 
+This project also covers the response side, not just detection. Each alert has a corresponding runbook in [`/runbooks`](runbooks/) documenting the triage steps and the actual containment action taken (account lockout, credential rotation, network blocking, access restriction, or a documented procedure where live execution wasn't possible).
+
 ## Architecture
 
 ```
@@ -34,13 +36,13 @@ Deployed via Docker (Elasticsearch + Kibana), with Winlogbeat installed natively
 
 ## The Five Detections
 
-| # | Detection | MITRE ATT&CK | Severity | Risk Score | Data Source |
-|---|---|---|---|---|---|
-| 1 | Excessive Login Failures (Brute Force) | [T1110](https://attack.mitre.org/techniques/T1110) — Credential Access | High | 73 | Real (Event ID 4625, threshold >3 in 2m) |
-| 2 | Disabled Account Sign-In Attempt | [T1078](https://attack.mitre.org/techniques/T1078) — Defense Evasion | Medium | 47 | Real (Event ID 4625, Sub Status 0xC0000072) |
-| 3 | Login Outside the UK (Anomalous Geolocation) | [T1078](https://attack.mitre.org/techniques/T1078) — Initial Access | High | 73 | Simulated + real GeoIP enrichment pipeline |
-| 4 | Mass Download Detected (Bulk File Access) | [T1074](https://attack.mitre.org/techniques/T1074) — Collection | Medium | 47 | Real (Event ID 4663, object access auditing, threshold >10) |
-| 5 | Anonymous Link Used for Download | [T1567.002](https://attack.mitre.org/techniques/T1567/002) — Exfiltration | High | 73 | Simulated M365 audit log event |
+| # | Detection | MITRE ATT&CK | Severity | Risk Score | Data Source | Runbook |
+|---|---|---|---|---|---|---|
+| 1 | Excessive Login Failures (Brute Force) | [T1110](https://attack.mitre.org/techniques/T1110) — Credential Access | High | 73 | Real (Event ID 4625, threshold >3 in 2m) | [Response](runbooks/01-excessive-login-failures.md) |
+| 2 | Disabled Account Sign-In Attempt | [T1078](https://attack.mitre.org/techniques/T1078) — Defense Evasion | Medium | 47 | Real (Event ID 4625, Sub Status 0xC0000072) | [Response](runbooks/02-disabled-account-signin.md) |
+| 3 | Login Outside the UK (Anomalous Geolocation) | [T1078](https://attack.mitre.org/techniques/T1078) — Initial Access | High | 73 | Simulated + real GeoIP enrichment pipeline | [Response](runbooks/03-anomalous-geolocation.md) |
+| 4 | Mass Download Detected (Bulk File Access) | [T1074](https://attack.mitre.org/techniques/T1074) — Collection | Medium | 47 | Real (Event ID 4663, object access auditing, threshold >10) | [Response](runbooks/04-mass-download.md) |
+| 5 | Anonymous Link Used for Download | [T1567.002](https://attack.mitre.org/techniques/T1567/002) — Exfiltration | High | 73 | Simulated M365 audit log event | [Response](runbooks/05-anonymous-link-download.md) |
 
 ### 1. Excessive Login Failures — T1110 Brute Force
 Generated real failed logons against a local test account using `System.DirectoryServices.AccountManagement.ValidateCredentials`. Detection rule: Elasticsearch threshold query, `event.code: 4625`, grouped by `user.name`, alerting when count exceeds 3 within a 2-minute window.
