@@ -1,0 +1,29 @@
+title: Login Outside the UK (Anomalous Geolocation)
+id: 6cb724af-3737-4350-90a2-2b04c59e8e2c
+status: test
+description: Detects a successful logon (Event ID 4624) where GeoIP enrichment resolves the source IP to a country other than GB. Windows Security events do not carry geolocation natively, so this rule depends on a GeoIP ingest pipeline enriching source.ip into source.geo.country_iso_code before the rule evaluates it.
+references:
+    - https://attack.mitre.org/techniques/T1078/
+author: RaheemC4
+date: 2026-09-06
+tags:
+    - attack.initial-access
+    - attack.t1078
+logsource:
+    product: windows
+    service: security
+    definition: 'Requires a GeoIP enrichment pipeline applied to source.ip before this rule runs. Not a native Windows event field.'
+detection:
+    selection:
+        EventID: 4624
+    filter:
+        source.geo.country_iso_code: 'GB'
+    condition: selection and not filter
+fields:
+    - TargetUserName
+    - source.ip
+    - source.geo.country_iso_code
+falsepositives:
+    - Legitimate travel or remote work by staff located outside the UK
+    - Corporate VPN exit nodes located outside the UK
+level: high

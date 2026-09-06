@@ -1,0 +1,26 @@
+title: Disabled Account Sign-In Attempt
+id: a844fdd2-3f05-4eae-a864-59ed43b8bf89
+status: test
+description: Detects a logon attempt using the correct password against a disabled account (Sub Status 0xC0000072), which only surfaces on interactive logons. Network logons with a disabled account return a generic bad-credentials status instead, so this rule specifically targets the interactive case.
+references:
+    - https://attack.mitre.org/techniques/T1078/
+author: RaheemC4
+date: 2026-09-06
+tags:
+    - attack.defense-evasion
+    - attack.t1078
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4625
+        SubStatus: '0xC0000072'
+    condition: selection
+fields:
+    - TargetUserName
+    - IpAddress
+    - WorkstationName
+falsepositives:
+    - Account disabled mid-session without the user being informed (rare)
+level: medium

@@ -1,0 +1,25 @@
+title: Mass Download Detected (Bulk File Access)
+id: 6530da6c-cf8d-42ae-900c-5cc82d906786
+status: test
+description: Detects a single user account reading more than 10 files within a short window (Event ID 4663, object access auditing), which may indicate bulk data staging ahead of exfiltration or an offboarding user copying data before leaving. Timeframe is set to 5 minutes as a starting point and should be tuned to the environment.
+references:
+    - https://attack.mitre.org/techniques/T1074/
+author: RaheemC4
+date: 2026-09-06
+tags:
+    - attack.collection
+    - attack.t1074
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4663
+    timeframe: 5m
+    condition: selection | count(ObjectName) by SubjectUserName > 10
+fields:
+    - SubjectUserName
+    - ObjectName
+falsepositives:
+    - Legitimate bulk file operations such as backups, migrations, or indexing jobs
+level: medium

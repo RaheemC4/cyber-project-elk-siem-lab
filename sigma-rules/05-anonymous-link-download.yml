@@ -1,0 +1,25 @@
+title: Anonymous Link Used for Download (M365)
+id: b100f5e4-57aa-42dd-8be7-20a672640aa6
+status: test
+description: Detects use of an anonymous sharing link to download a file from Microsoft 365, sourced from the unified audit log AnonymousLinkUsed operation. May indicate unauthorized external access to sensitive data shared without access restrictions.
+references:
+    - https://attack.mitre.org/techniques/T1567/002/
+author: RaheemC4
+date: 2026-09-06
+tags:
+    - attack.exfiltration
+    - attack.t1567.002
+logsource:
+    product: m365
+    service: audit
+detection:
+    selection:
+        Operation: 'AnonymousLinkUsed'
+    condition: selection
+fields:
+    - UserId
+    - ObjectId
+    - ClientIP
+falsepositives:
+    - Legitimate external sharing for approved business purposes such as contractors or clients
+level: high

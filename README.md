@@ -78,6 +78,10 @@ This event type originates from Microsoft 365's unified audit log (`AnonymousLin
 ![Simulated M365 audit log event in Discover](screenshots/08-discover-anonymous-link-evidence.png)
 *The injected M365 audit event, shaped to match Microsoft's real `AnonymousLinkUsed` schema, correctly indexed into its own `m365-audit-logs` index.*
 
+## Sigma Rules
+
+Each detection above has also been written as a vendor-agnostic [Sigma rule](sigma-rules/), so the same detection logic isn't locked to Elastic and can be converted to Splunk, Sentinel or QRadar syntax.
+
 ## Notable Problems Solved Along the Way
 
 Building this surfaced several real infrastructure problems, not just "write a query and done":
@@ -90,6 +94,7 @@ Building this surfaced several real infrastructure problems, not just "write a q
 ## Skills Demonstrated
 
 - Detection engineering with Elasticsearch (threshold queries, custom KQL, MITRE ATT&CK mapping)
+- Writing platform-agnostic detections in Sigma format
 - Log source onboarding and field normalization (Winlogbeat, ECS field mapping)
 - Data enrichment pipeline design (GeoIP ingest pipeline, built and tested via the simulate API)
 - Windows Security auditing configuration (logon auditing, object access/SACL auditing)

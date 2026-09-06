@@ -1,0 +1,26 @@
+title: Excessive Login Failures (Brute Force)
+id: 182009d6-a138-4fc1-98f5-1d5e610a74a7
+status: test
+description: Detects more than 3 failed logon attempts (Event ID 4625) by the same user within a 2 minute window, indicating a possible brute force attempt.
+references:
+    - https://attack.mitre.org/techniques/T1110/
+author: RaheemC4
+date: 2026-09-06
+tags:
+    - attack.credential-access
+    - attack.t1110
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4625
+    timeframe: 2m
+    condition: selection | count(TargetUserName) by TargetUserName > 3
+fields:
+    - TargetUserName
+    - IpAddress
+falsepositives:
+    - User mistyping their password repeatedly
+    - Automated process or scheduled task using expired credentials
+level: high
